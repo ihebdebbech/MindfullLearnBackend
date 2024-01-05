@@ -1,5 +1,7 @@
 import message from "../model/message.js";
 import Session from "../model/sessions.js";
+import { addReclamation } from './reclamationController.js';
+import Filter from 'bad-words';
 export async function getAllMessages(req, res) {
   await message.find({})
 
@@ -12,6 +14,8 @@ export async function getAllMessages(req, res) {
 }
 
 export async function addOnceMessage(req,res) {
+  const filter = new Filter();
+  
    console.log(req.body)
     const {
       recipient,
@@ -20,6 +24,52 @@ export async function addOnceMessage(req,res) {
      
   } = req.body;
     // Invoquer la méthode create directement sur le modèle
+    if (filter.isProfane(content)) {
+      let reclamationType = 'swear words';
+      if (filter.isProfane(content, { list: ['sex', 'ass', 'sleep together','private part'] })) {
+          reclamationType = 'user reclamation';
+      }
+
+      // Creating a fake reclamation object for demonstration
+      const fakeReclamation = {
+          reclamation: {
+              culprit: sender, // Assuming sender is the user ID
+              type: reclamationType,
+              victim :recipient
+          },
+      };
+
+      // Create a fake req and res
+      const fakeReq = { body: fakeReclamation };
+      const fakeRes = {
+          status: (statusCode) => ({
+              json: (data) => {
+                  console.log('Fake Response:', statusCode, data);
+              },
+          }),
+      };
+
+      try {
+          await addReclamation(fakeReq, fakeRes);
+      } catch (err) {
+          console.error('Error creating reclamation:', err);
+      }
+
+      const censoredContent = filter.clean(content);
+
+      try {
+          const newMessage = await message.create({
+              recipient: recipient,
+              sender: sender,
+              content: censoredContent,
+          });
+          res.json(newMessage);
+      } catch (err) {
+          console.error(err);
+          res.status(500).json({ error: err.message });
+      }
+  }
+    else{
     try {
       const newMessage = await message.create({
         recipient: recipient,
@@ -31,6 +81,7 @@ export async function addOnceMessage(req,res) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
+}
 }
 export async function fetchconversations (req,res){
   const userId = req.body.userId;

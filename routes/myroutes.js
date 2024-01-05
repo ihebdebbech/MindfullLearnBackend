@@ -2,6 +2,7 @@ import express from "express";
 import userController from "../controller/userController.js";
 import postController from "../controller/postController.js";
 import { fetchconversations,getAllMessages,addOnceMessage,deleteOnceMessage,getOnceMessage ,getAllSessions2,Updatesessions2,getMessagesBySenderAndRecipient} from '../controller/messageController.js';
+import { addReclamation,updaterec,getAllReclamations,getReclamationsByCulprit} from '../controller/reclamationController.js';
 //import {getAllSessions,Updatesessions} from "../controller/SessionsController.js";
 
 const router = express.Router();
@@ -25,6 +26,15 @@ router
 .route('/message/')
 .get(getAllMessages)
 .post(addOnceMessage);
+router
+.route('/reclamation/')
+.get(getAllReclamations)
+.post(addReclamation)
+.put(updaterec);
+router
+.route('/reclamationbyculpirt/:culprit')
+.get(getReclamationsByCulprit)
+
 router
 .route('/messages/:senderId/:recipientId')
 .get(getMessagesBySenderAndRecipient)
