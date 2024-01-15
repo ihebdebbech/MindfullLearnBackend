@@ -1,0 +1,7 @@
+{
+  "name": "signaling",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "custom"
+}
